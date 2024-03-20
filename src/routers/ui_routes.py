@@ -154,3 +154,30 @@ def rtl(request: Request):
 @oauth2.auth_required
 def settings(request: Request):
     return TEMPLATES.TemplateResponse("home/settings.html", {"request": request})
+
+@router.get("/quiz", name="quiz")
+@oauth2.auth_required
+def quiz(request: Request):
+    quiz_dict = {
+        "questions": [
+            {
+                "id": 1,
+                "text": "What is the capital of France?",
+                "options": [
+                    {"id": 1, "text": "Paris"},
+                    {"id": 2, "text": "London"},
+                    {"id": 3, "text": "Berlin"},
+                ],
+            },
+            # Add more questions as needed
+        ]
+    }
+    return TEMPLATES.TemplateResponse("home/quiz.html", {"request": request, "quiz": quiz_dict})
+
+@router.post('/submit-quiz', status_code=status.HTTP_200_OK)
+async def submit_quiz(request: Request):
+    form_data = await request.form()
+    # Process the submitted answers
+    # This is where you'd check the answers and calculate the score
+    results = {}
+    return TEMPLATES.TemplateResponse("home/quiz_results.html", {"request": request, "results": results})

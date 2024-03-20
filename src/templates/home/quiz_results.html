@@ -1,0 +1,48 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Quiz Results {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<!-- Add any specific CSS files for the quiz results page here if needed -->
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">Quiz Results</h5>
+        </div>
+        <div class="card-body">
+          <h6 class="text-uppercase text-secondary mb-4">Your Score: {{ results.score }}/{{ results.total }}</h6>
+          <div class="mb-3">
+            <h6 class="mb-1">Feedback</h6>
+            <p>{{ results.feedback }}</p>
+          </div>
+          <div>
+            <h6 class="mb-1">Correct Answers</h6>
+            {% for question in results.questions %}
+              <div class="mb-2">
+                <p class="font-weight-bold">{{ question.text }}</p>
+                <p class="text-success">Correct answer: {{ question.correct_answer }}</p>
+                <p class="text-info">Your answer: {{ question.your_answer }}</p>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="mt-4">
+            <a href="/quiz" class="btn btn-primary">Try Again</a>
+            <a href="/" class="btn btn-secondary">Back to Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+<!-- Add any specific JavaScript files for the quiz results page here if needed -->
+{% endblock javascripts %}
