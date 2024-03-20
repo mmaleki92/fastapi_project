@@ -149,3 +149,8 @@ def profile(request: Request):
 @oauth2.auth_required
 def rtl(request: Request):
     return TEMPLATES.TemplateResponse("home/rtl.html", {"request" : request})
+
+@router.get('/settings', status_code=status.HTTP_200_OK)
+@oauth2.auth_required
+def settings(request: Request):
+    return TEMPLATES.TemplateResponse("home/settings.html", {"request": request})
