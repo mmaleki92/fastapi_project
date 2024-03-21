@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 
 class UserOut(BaseModel):
     id: int
@@ -53,3 +53,25 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[str]
+
+class OptionBase(BaseModel):
+    text: str
+    is_correct: bool
+
+class QuestionBase(BaseModel):
+    text: str
+    options: List[OptionBase]
+
+class QuizBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    questions: List[QuestionBase]
+
+class QuizCreate(QuizBase):
+    pass
+
+class Quiz(QuizBase):
+    id: int
+
+    class Config:
+        orm_mode = True

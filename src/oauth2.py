@@ -4,8 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from datetime import datetime, timedelta
-from urllib.request import Request
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import RedirectResponse
 from jose import JWTError, jwt
@@ -63,7 +62,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     token = verify_access_token(token, credentials_exception)
 
     user = db.query(models.User).filter(models.User.id == token.id).first()
-    
 
     return user
 
@@ -78,3 +76,31 @@ def auth_required(router):
             return router(**kwargs)        
         return RedirectResponse(app.ui_router.url_path_for('signin'))    
     return authorize_cookie
+
+def get_current_active_admin(request: Request, db: Session = Depends(database.get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    # Retrieve the token from the Authorization cookie
+    auth_cookie = request.cookies.get("Authorization")
+    if not auth_cookie:
+        raise credentials_exception
+
+    # Assuming the token is prefixed with "Bearer ", extract the actual token
+    token = auth_cookie.replace("Bearer ", "", 1)
+
+    token_data = verify_access_token(token, credentials_exception)
+    user = db.query(models.User).filter(models.User.id == token_data.id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.is_admin:
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="The user doesn't have enough privileges",
+        )

@@ -57,7 +57,10 @@ async def signin(request: Request):
 
         redirect = RedirectResponse(url=router.url_path_for('home'))
         redirect.status_code = 302
-        redirect.set_cookie('Authorization', f'Bearer {token}')
+        #TODO: secure and httponly
+        # redirect.set_cookie('Authorization', f'Bearer {token}', httponly=True, secure=True)
+
+        redirect.set_cookie('Authorization', f'Bearer {token}', httponly=True, secure=True)
         return redirect
 
     if (response.status_code==500):
@@ -85,9 +88,10 @@ async def register(request: Request, response_model=HTMLResponse):
 @router.post("/register", status_code=status.HTTP_200_OK)
 async def register(request: Request, response_model=HTMLResponse):
     form = await request.form()
-    form = form._dict
-    form.pop('register')
-
+    form_dict = dict(form)  # Convert to regular dict
+    form_dict.pop('register', None)  # Safely remove 'register' key if it exists
+    form = form_dict
+    print(form_dict)
     #validates the form data
     new_user = models.User(**form)
 
