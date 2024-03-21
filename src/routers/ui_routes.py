@@ -159,6 +159,12 @@ def rtl(request: Request):
 def settings(request: Request):
     return TEMPLATES.TemplateResponse("home/settings.html", {"request": request})
 
+@router.get('/music_player', status_code=status.HTTP_200_OK)
+@oauth2.auth_required
+def music_player(request: Request):
+    return TEMPLATES.TemplateResponse("home/music_player.html", {"request": request})
+
+
 @router.get("/quiz", name="quiz")
 @oauth2.auth_required
 def quiz(request: Request):

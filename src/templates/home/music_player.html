@@ -1,0 +1,46 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Settings {% endblock title %}
+
+{% block stylesheets %}
+<!-- Add any specific CSS files for the settings page here if needed -->
+<style>
+/* Basic styling for the music player; customize as needed */
+.audio-player {
+  margin-top: 20px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  padding: 10px;
+}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-9 col-12 mx-auto">
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h6>Settings</h6>
+        </div>
+        <div class="card-body px-4 pt-2 pb-2">
+          <!-- Settings form or content goes here -->
+          <p>This is a placeholder for settings. Customize as needed.</p>
+
+          <!-- Music Player -->
+          <div class="audio-player">
+            <audio controls>
+              <source src="{{ url_for('static', path='audio/audio_default.mp3') }}" type="audio/mp3">
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<!-- Add any specific JavaScript files for the settings page here if needed -->
+{% endblock javascripts %}
