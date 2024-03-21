@@ -30,7 +30,14 @@ TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "../templates"))
 @router.get("/", status_code=status.HTTP_200_OK)
 @oauth2.auth_required
 def home(request: Request, response_model=HTMLResponse):
-    return TEMPLATES.TemplateResponse("home/index.html", {"request" : request})
+    # Dummy data for monthly sales
+    monthly_sales_data = {
+        "labels": ["January", "February", "March", "April", "May", "June", "July"],
+        "data": [10000, 15000, 8000, 20000, 18000, 25000, 30000]
+    }
+    
+    # Pass the sales data to the template
+    return TEMPLATES.TemplateResponse("home/index.html", {"request": request, "monthly_sales_data": monthly_sales_data})
 
 
 @router.get("/login", status_code=status.HTTP_200_OK)
@@ -191,3 +198,4 @@ async def submit_quiz(request: Request):
     # This is where you'd check the answers and calculate the score
     results = {}
     return TEMPLATES.TemplateResponse("home/quiz_results.html", {"request": request, "results": results})
+
