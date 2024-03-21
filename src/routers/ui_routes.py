@@ -17,7 +17,7 @@ from src import app
 import src.oauth2 as oauth2
 from src.config import Settings
 from src import models, schemas
-
+import numpy as np
 
 router = APIRouter(
     tags = ['User Interface']
@@ -32,8 +32,8 @@ TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "../templates"))
 def home(request: Request, response_model=HTMLResponse):
     # Dummy data for monthly sales
     monthly_sales_data = {
-        "labels": ["January", "February", "March", "April", "May", "June", "July"],
-        "data": [10000, 15000, 8000, 20000, 18000, 25000, 30000]
+        "labels": np.arange(100).tolist(), #["January", "February", "March", "April", "May", "June", "July"],
+        "data": np.random.rand(100).tolist() #[10000, 15000, 8000, 20000, 18000, 25000, 30000]
     }
     
     # Pass the sales data to the template
@@ -170,6 +170,12 @@ def settings(request: Request):
 @oauth2.auth_required
 def music_player(request: Request):
     return TEMPLATES.TemplateResponse("home/music_player.html", {"request": request})
+
+
+@router.get('/game', status_code=status.HTTP_200_OK)
+@oauth2.auth_required
+def game(request: Request):
+    return TEMPLATES.TemplateResponse("home/game.html", {"request": request})
 
 
 @router.get("/quiz", name="quiz")

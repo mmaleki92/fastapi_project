@@ -1,0 +1,204 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Quiz Results {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+    body {
+        font-family: 'Open Sans', sans-serif;
+    }
+    .game-selection {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    #snakeGame {
+        display: block;
+        margin: 0 auto;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        border-radius: 10px;
+    }
+</style>
+<!-- Add any specific CSS files for the quiz results page here if needed -->
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="game-selection">
+    <label for="gameSelect">Choose a game:</label>
+    <select id="gameSelect" onchange="changeGame(this.value)">
+        <option value="snake">Snake Game</option>
+        <option value="otherGame">Other Game</option>
+        <!-- Add more games as options here -->
+    </select>
+</div>
+    
+<div class="container-fluid py-4">
+  <!-- Game Container -->
+  <div id="snake-game-container" style="width: 600px; height: 400px; position: relative;">
+    <canvas id="snakeGame" width="600" height="400"></canvas>
+  </div>
+  <!-- Existing Content -->
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <!-- ... existing content -->
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.min.js"></script>
+<script>
+    const canvas = document.getElementById('snakeGame');
+    const ctx = canvas.getContext('2d');
+    const box = 20; // Size of each square
+    let snake = [];
+    snake[0] = {
+      x: 9 * box,
+      y: 10 * box
+    };
+    let food = {
+      x: Math.floor(Math.random() * 17 + 1) * box,
+      y: Math.floor(Math.random() * 15 + 3) * box
+    };
+    let score = 0;
+    // Control the snake direction
+    let d;
+    document.addEventListener("keydown", direction);
+    function direction(event) {
+      if (event.keyCode == 37 && d != "RIGHT") {
+        d = "LEFT";
+      } else if (event.keyCode == 38 && d != "DOWN") {
+        d = "UP";
+      } else if (event.keyCode == 39 && d != "LEFT") {
+        d = "RIGHT";
+      } else if (event.keyCode == 40 && d != "UP") {
+        d = "DOWN";
+      }
+    }
+    // Check collision function
+    function collision(head, array) {
+      for (let i = 0; i < array.length; i++) {
+        if (head.x == array[i].x && head.y == array[i].y) {
+          return true;
+        }
+      }
+      return false;
+    }
+    // Draw everything to the canvas
+    function draw() {
+      ctx.fillStyle = "#f0f0f0";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = (i == 0) ? "green" : "white";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        ctx.strokeStyle = "red";
+        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+      }
+      ctx.fillStyle = "red";
+      ctx.fillRect(food.x, food.y, box, box);
+      // Old head position
+      let snakeX = snake[0].x;
+      let snakeY = snake[0].y;
+      // Which direction
+      if (d == "LEFT") snakeX -= box;
+      if (d == "UP") snakeY -= box;
+      if (d == "RIGHT") snakeX += box;
+      if (d == "DOWN") snakeY += box;
+      // If the snake eats the food
+      if (snakeX == food.x && snakeY == food.y) {
+        score++;
+        food = {
+          x: Math.floor(Math.random() * 17 + 1) * box,
+          y: Math.floor(Math.random() * 15 + 3) * box
+        };
+        // We don't remove the tail
+      } else {
+        // Remove the tail
+        snake.pop();
+      }
+      // Add new Head
+      let newHead = {
+        x: snakeX,
+        y: snakeY
+      };
+      // Game over
+      if (snakeX < box || snakeX > 17 * box || snakeY < 3 * box || snakeY > 17 * box || collision(newHead, snake)) {
+        clearInterval(game);
+        alert('Game over');
+      }
+      snake.unshift(newHead);
+      ctx.fillStyle = "white";
+      ctx.font = "45px Changa one";
+      ctx.fillText(score, 2 * box, 1.6 * box);
+    }
+    // Call draw function every 100 ms
+  // Call draw function every 100 ms
+  let game = setInterval(draw, 100);
+
+  function draw() {
+    ctx.fillStyle = "#f0f0f0";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Inside the draw function, update the snake drawing part
+    for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = (i === 0) ? "#4CAF50" : "#8BC34A"; // Head: darker green, Body: lighter green
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        
+        // Adding rounded corners to snake parts
+        ctx.strokeStyle = "#3E8914";
+        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+    }
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
+
+    // old head position
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
+
+    // direction
+    if (d === "LEFT") snakeX -= box;
+    if (d === "UP") snakeY -= box;
+    if (d === "RIGHT") snakeX += box;
+    if (d === "DOWN") snakeY += box;
+
+    // if the snake eats food
+    if (snakeX === food.x && snakeY === food.y) {
+      score++;
+      food = {
+        x: Math.floor(Math.random() * 17 + 1) * box,
+        y: Math.floor(Math.random() * 15 + 3) * box
+      };
+      // we don't remove the tail
+    } else {
+      // remove the tail
+      snake.pop();
+    }
+
+    // add new head
+    let newHead = {
+      x: snakeX,
+      y: snakeY
+    };
+
+    // game over
+    if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+      clearInterval(game);
+      alert('Game Over. Your score: ' + score);
+    }
+
+    snake.unshift(newHead);
+
+    ctx.fillStyle = "black";
+    ctx.font = "45px Changa one";
+    ctx.fillText(score, 2 * box, 1.6 * box);
+  }
+  function changeGame(gameName) {
+    alert(`Switching to: ${gameName}`);
+    // Here, you would implement logic to initialize the selected game.
+    // This might involve clearing the canvas, resetting game variables, and initializing the new game.
+}
+</script>
+{% endblock javascripts %}
