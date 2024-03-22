@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from fastapi import APIRouter, Request, Depends, status, Response, HTTPException
+from fastapi import APIRouter, Request, Depends, UploadFile, File, status, Response, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -18,6 +18,8 @@ import src.oauth2 as oauth2
 from src.config import Settings
 from src import models, schemas
 import numpy as np
+import shutil
+import os
 
 router = APIRouter(
     tags = ['User Interface']
@@ -148,12 +150,44 @@ def virtual_reality(request: Request):
     return TEMPLATES.TemplateResponse("home/virtual-reality.html", {"request" : request})
 
 
+@router.post("/users/{user_id}/upload-image")
+async def upload_user_image(user_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    file_extension = Path(file.filename).suffix
+    if file_extension not in ['.jpg', '.jpeg', '.png']:
+        raise HTTPException(status_code=400, detail="Invalid file format")
+
+    # Ensure the target directory exists
+    target_dir = Path("src/static/profile_imgs")
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # Determine the file's destination path
+    file_path = target_dir / f"{user_id}_{file.filename}"
+    
+    # Open a file at the destination path for writing and copy the uploaded file's contents
+    with file_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Optionally, store a relative path or just the filename in your database
+    user.image_url = file_path.name  # Storing just the filename for simplicity
+    db.commit()
+
+    return {"filename": file.filename}
+
 
 @router.get('/profile', status_code=status.HTTP_200_OK)
 @oauth2.auth_required
-def profile(request: Request):
-    return TEMPLATES.TemplateResponse("home/profile.html", {"request" : request})
+def profile(request: Request,  user_id: int = Depends(oauth2.get_current_user), db: Session = Depends(get_db)):
+    if user_id is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    print("*"*40)
 
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    # Now `user` contains all the information about the user, including `image_url`
+    return  TEMPLATES.TemplateResponse("home/profile.html", {"request": request, "user": user})
 
 
 @router.get('/rtl', status_code=status.HTTP_200_OK)

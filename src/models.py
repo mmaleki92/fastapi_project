@@ -16,6 +16,8 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     is_admin = Column(Boolean, default=False)  # New admin flag
+    image_url = Column(String, default='default_profile.jpg')  # Default profile image
+    name = Column(String, nullable=True)  # Add this line for the name column
 
 
 class Product(Base):
