@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 import http3
+from typing import List
 
 from sqlalchemy.orm import Session
 from src.helpers.database import get_db
@@ -19,7 +20,6 @@ from src.config import Settings
 from src import models, schemas
 import numpy as np
 import shutil
-import os
 
 router = APIRouter(
     tags = ['User Interface']
@@ -49,8 +49,8 @@ async def signin(request: Request, response_model=HTMLResponse):
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def signin(request: Request):
-    form = await request.form()
-    form = form._dict
+    form_data = await request.form()
+    form = form_data._dict
     form.pop('login')
     
     base_url = request.base_url
@@ -82,7 +82,6 @@ async def signin(request: Request):
     test_users = test_response.json()
     msg = 'Wrong User or Password'
     for test_user in test_users:
-        print (test_user)
         if form['username']==test_user['email']:
             msg = 'Password is Wrong'
         
@@ -100,7 +99,6 @@ async def register(request: Request, response_model=HTMLResponse):
     form_dict = dict(form)  # Convert to regular dict
     form_dict.pop('register', None)  # Safely remove 'register' key if it exists
     form = form_dict
-    print(form_dict)
     #validates the form data
     new_user = models.User(**form)
 
@@ -183,7 +181,6 @@ async def upload_user_image(user_id: int, file: UploadFile = File(...), db: Sess
 def profile(request: Request,  user_id: int = Depends(oauth2.get_current_user), db: Session = Depends(get_db)):
     if user_id is None:
         raise HTTPException(status_code=404, detail="User not found")
-    print("*"*40)
 
     user = db.query(models.User).filter(models.User.id == user_id).first()
     # Now `user` contains all the information about the user, including `image_url`
@@ -239,3 +236,48 @@ async def submit_quiz(request: Request):
     results = {}
     return TEMPLATES.TemplateResponse("home/quiz_results.html", {"request": request, "results": results})
 
+@router.get("/blog", status_code=status.HTTP_200_OK)
+@oauth2.auth_required
+def blog(request: Request, db: Session = Depends(get_db)):
+    posts = db.query(models.BlogPost).all()
+
+    return TEMPLATES.TemplateResponse("blog/blog.html", {"request": request, "posts": posts})
+
+# it was async and I changed it to make it just def so it woud works.
+@router.post("/blog/{post_id}/comment", status_code=status.HTTP_302_FOUND)
+@oauth2.auth_required
+async def post_comment(post_id: int, request: Request, db: Session = Depends(get_db)):
+    form_data = await request.form()
+    comment_content = form_data.get("comment_content")
+    # Assuming you have a way to get the current user's id, e.g., from the request or session
+    user_id = request.user.id  # This is just a placeholder; adjust according to your auth system
+
+    comment = models.Comment(content=comment_content, post_id=post_id, user_id=user_id)
+    db.add(comment)
+    db.commit()
+
+    return RedirectResponse(url=f"/blog#{post_id}", status_code=status.HTTP_302_FOUND)
+
+@router.get("/blog", response_model=List[schemas.BlogPost])
+async def get_blog_posts(db: Session = Depends(get_db)):
+    posts = db.query(models.BlogPost).all()
+    if not posts:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No blog posts found')
+    return posts
+
+@router.get("/blog/new", response_model=schemas.BlogPostCreate)
+async def new_post(request: Request, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    return TEMPLATES.TemplateResponse("blog/new_post.html", {"request": request})
+
+@router.post("/blog/new", status_code=status.HTTP_201_CREATED)
+# @oauth2.auth_required
+async def create_post(request: Request, blog_post: schemas.BlogPostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    form_data = await request.form()  
+    title = form_data.get("title")
+    content = form_data.get("content")
+    print(title)
+    new_blog_post = models.BlogPost(**blog_post.dict(), user_id=current_user.id)
+    db.add(new_blog_post)
+    db.commit()
+    db.refresh(new_blog_post)
+    return RedirectResponse(url="/blog", status_code=status.HTTP_302_FOUND)

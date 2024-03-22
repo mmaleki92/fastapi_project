@@ -5,6 +5,7 @@ Copyright (c) 2019 - present AppSeed.us
 
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
+from datetime import datetime
 
 class UserOut(BaseModel):
     id: int
@@ -72,6 +73,32 @@ class QuizCreate(QuizBase):
 
 class Quiz(QuizBase):
     id: int
+
+    class Config:
+        orm_mode = True
+class CommentBase(BaseModel):
+    content: str
+
+class CommentCreate(CommentBase):
+    pass
+
+class Comment(CommentBase):
+    id: int
+    post_id: int
+
+    class Config:
+        orm_mode = True
+
+class BlogPostBase(BaseModel):
+    title: str
+    content: str
+
+class BlogPostCreate(BlogPostBase):
+    pass
+
+class BlogPost(BlogPostBase):
+    id: int
+    comments: List[Comment] = []
 
     class Config:
         orm_mode = True

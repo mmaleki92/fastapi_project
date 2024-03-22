@@ -1,0 +1,43 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Blog {% endblock title %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('new_post') }}" class="btn btn-success">Create New Post</a>
+</div>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            {% for post in posts %}
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h6>{{ post.title }}</h6>
+                    <p class="text-sm">{{ post.date_posted }} by {{ post.author }}</p>
+                </div>
+                <div class="card-body">
+                    <p>{{ post.content }}</p>
+                </div>
+                <div class="card-footer">
+                    <h6>Comments</h6>
+                    {% for comment in post.comments %}
+                    <div class="d-flex mb-2">
+                        <p class="text-sm"><strong>{{ comment.author }}:</strong> {{ comment.content }}</p>
+                    </div>
+                    {% endfor %}
+                    <form action="{{ url_for('post_comment', post_id=post.id) }}" method="post">
+                        <div class="mb-3">
+                            <label for="commentContent" class="form-label">Leave a comment</label>
+                            <textarea class="form-control" id="commentContent" name="comment_content" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+</div>
+{% endblock content %}

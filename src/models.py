@@ -68,3 +68,21 @@ class Option(Base):
 
 Quiz.questions = relationship("Question", order_by=Question.id, back_populates="quiz")
 Question.options = relationship("Option", order_by=Option.id, back_populates="question")
+
+class BlogPost(Base):
+    __tablename__ = 'blog_posts'
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    content = Column(String)
+    # Assuming a simple one-to-many relationship for demonstration
+    comments = relationship('Comment', back_populates='post')
+
+class Comment(Base):
+    __tablename__ = 'comments'
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(String, index=True)
+    post_id = Column(Integer, ForeignKey('blog_posts.id'))
+
+    post = relationship('BlogPost', back_populates='comments')
