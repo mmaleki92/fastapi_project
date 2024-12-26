@@ -29,12 +29,12 @@ itsdangerous==2.1.2
 Jinja2==3.1.2
 Mako==1.2.1
 MarkupSafe==2.1.1
-mysqlclient==2.1.1
-orjson==3.6.8
+# mysqlclient==2.1.1
+# orjson==3.6.8
 packaging==21.3
 passlib==1.7.4
 pluggy==1.0.0
-psycopg2==2.9.3
+# psycopg2==2.9.3
 py==1.11.0
 pyasn1==0.4.8
 pycparser==2.21
@@ -60,3 +60,4 @@ uvicorn==0.17.6
 watchgod==0.8.2
 websockets==10.3
 zipp==3.8.0
+numpy

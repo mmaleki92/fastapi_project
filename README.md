@@ -26,6 +26,11 @@ Open-source FastAPI starter provided by `AppSeed` op top of a modern `Bootstrap 
 
 <br />
 
+# installing rust and cargo
+```
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
 ## Project Structure
 
 > This application is composed of `3 basic parts` in the root folder.
@@ -77,6 +82,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 <br />
+
+
+python: 3.11
+
 
 > Migrate the database (`create tables`)
 
